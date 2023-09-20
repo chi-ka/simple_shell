@@ -13,6 +13,23 @@
 #define MAX_PATH_LENGTH 1024
 #define MAX_BUFFER_SIZE 1024
 
+/**
+ * struct BufferInfo - Structure to hold buffer-related information.
+ * @position: Current position in the buffer.
+ * @bytesRead: Total bytes read into the buffer.
+ * @buffer: The buffer to store data read from the input.
+ */
+
+struct BufferInfo
+{
+	int position;
+	int bytesRead;
+	char buffer[MAX_BUFFER_SIZE];
+};
+
+typedef struct BufferInfo BufferInfo;
+
+char *check_and_refill_buffer(BufferInfo *info);
 int _strcmp(char *s1, char *s2);
 int _strncmp(char *s1, char *s2, size_t n);
 unsigned int _strcspn(char *s, char *accept);

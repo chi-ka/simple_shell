@@ -51,5 +51,5 @@ int main(int argc, char **argv, char **env)
 		}
 	}
 
-	return exit_status;
+	return (exit_status);
 }
