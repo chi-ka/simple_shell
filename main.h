@@ -15,7 +15,7 @@ extern char **environ;
 void executeCommand(char *cmd, int *commandStatus);
 void envCommand(void);
 void handleError(char *cmd);
-char* findExecutable(char *command);
+char *findExecutable(char *command);
 int parseCommand(char *cmd, char *argv[], int *argc);
 
 #endif /* MAIN_H */
