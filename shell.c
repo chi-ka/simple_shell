@@ -10,8 +10,8 @@ extern char **environ;
 int main() 
 {
 	char *cmd = NULL;
-	int is_interactive = isatty(STDIN_FILENO);
-	size_t cmd_size = 0;
+	int is_all_spaces = 1, is_interactive = isatty(STDIN_FILENO);
+	size_t i, cmd_size = 0;
 	ssize_t getline_result;
 
 	while (1)
@@ -34,6 +34,19 @@ int main()
 		}
 
 		cmd[getline_result - 1] = '\0';
+
+		for (i = 0; i < strlen(cmd); i++)
+		{
+			if (cmd[i] != ' ') {
+				is_all_spaces = 0;
+				break;
+			}
+		}
+
+		if (is_all_spaces)
+		{
+			continue;
+		}
 
 		if (strcmp(cmd, "exit") == 0)
 		{
