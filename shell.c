@@ -1,55 +1,109 @@
 #include <stdio.h>
-#include "main.h"
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <errno.h>
+#define MAX_CMD_LEN 128
+
+void executeCommand(char *cmd);
+void handleError(char *cmd);
 
 /**
- * main - Entry point of the custom shell program.
- * @argc: The number of command-line arguments.
- * @argv: An array of strings containing the command-line arguments.
- * @env: An array of strings containing the environment variables.
+ * main - Entry point for a simple shell.
  *
- * Return: The exit status of the shell.
+ * Return: Always 0.
  */
 
-int main(int argc, char **argv, char **env)
+int main() 
 {
-	int exit_status = 0;
-	int should_exit = 0;
+    char *cmd = NULL;
+    int is_interactive = isatty(STDIN_FILENO);
+    size_t cmd_size = 0;
+    ssize_t getline_result;
 
-	(void)argc;
-	(void)argv;
+    while (1)
+    {
+        if (is_interactive)
+        {
+            write(STDOUT_FILENO, "#cisfun$ ", 9);
+        }
 
-	while (!should_exit)
-	{
-		char *input_line = custom_getline();
+        getline_result = getline(&cmd, &cmd_size, stdin);
 
-		if (!input_line)
-		{
-			break;
-		}
-		input_line[_strcspn(input_line, "\n")] = '\0';
+        if (getline_result == -1)
+        {
+            if (is_interactive) 
+            {
+                write(STDOUT_FILENO, "\n", 1);
+            }
+            free(cmd);
+            exit(0);
+        }
 
-		if (_strlen(input_line) == 0)
-		{
-			continue;
-		}
-		else if (_strcmp(input_line, "env") == 0)
-		{
-			print_env(env);
-		}
-		else if (_strncmp(input_line, "exit", 4) == 0)
-		{
-			handle_exit(input_line, &should_exit, &exit_status);
-		}
-		else
-		{
-			char *token = strtok_custom(input_line, "|");
+        cmd[getline_result - 1] = '\0';
 
-			{
-				execute_command(token);
-				token = strtok_custom(NULL, "|");
-			}
-		}
-	}
-
-	return (exit_status);
+        executeCommand(cmd);
+    }
 }
+
+/**
+ * executeCommand - Execute a command specified by 'cmd'.
+ * @cmd: The command to execute.
+ *
+ */
+
+void executeCommand(char *cmd)
+{
+    char *token = strtok(cmd, " ");
+    char *argv[MAX_CMD_LEN];
+    int argc = 0;
+    pid_t pid;
+    int status;
+
+    while (token != NULL)
+    {
+        argv[argc++] = token;
+        token = strtok(NULL, " ");
+    }
+
+    argv[argc] = NULL;
+
+    if ((pid = fork()) == 0)
+    {
+        if (execve(argv[0], argv, NULL) == -1) 
+        {
+            handleError(cmd);
+            exit(1);
+        }
+    }
+    else if (pid > 0)
+    {
+        if (waitpid(pid, &status, 0) == -1) 
+        {
+            handleError(cmd);
+        }
+    }
+    else
+    {
+        handleError(cmd);
+    }
+}
+
+/**
+ * handleError - Handle errors by printing an error message to STDERR.
+ * @cmd: The command associated with the error.
+ *
+ */
+
+void handleError(char *cmd)
+{
+    char error_msg[128];
+    strcpy(error_msg, cmd);
+    strcat(error_msg, ": ");
+    strcat(error_msg, strerror(errno));
+    strcat(error_msg, "\n");
+    write(STDERR_FILENO, error_msg, strlen(error_msg));
+}
+
