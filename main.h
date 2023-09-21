@@ -10,8 +10,7 @@
 #include <errno.h>
 #define MAX_CMD_LEN 128
 
-
-void executeCommand(char *cmd);
+void executeCommand(char *cmd, int *commandStatus);
 void handleError(char *cmd);
 char* findExecutable(char *command);
 

@@ -7,13 +7,13 @@
  */
 extern char **environ;
 
-
-int main(void)
+int main()
 {
 	char *cmd = NULL;
 	int is_all_spaces = 1, is_interactive = isatty(STDIN_FILENO);
 	size_t i, cmd_size = 0;
 	ssize_t getline_result;
+	int commandStatus = 0;
 
 	while (1)
 	{
@@ -30,7 +30,7 @@ int main(void)
 				write(STDOUT_FILENO, "\n", 1);
 			}
 			free(cmd);
-			exit(0);
+			exit(commandStatus);
 		}
 		cmd[getline_result - 1] = '\0';
 
@@ -49,7 +49,7 @@ int main(void)
 		if (strcmp(cmd, "exit") == 0)
 		{
 			free(cmd);
-			exit(2);
+			exit(commandStatus);
 		}
 		if (strcmp(cmd, "env") == 0)
 		{
@@ -60,6 +60,6 @@ int main(void)
 				env++;
 			}
 		}
-		executeCommand(cmd);
+		executeCommand(cmd, &commandStatus);
 	}
 }
