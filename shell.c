@@ -5,9 +5,8 @@
  *
  * Return: Always 0.
  */
-extern char **environ;
 
-int main()
+int main(void)
 {
 	char *cmd = NULL;
 	int is_all_spaces = 1, is_interactive = isatty(STDIN_FILENO);
@@ -21,6 +20,7 @@ int main()
 		{
 			write(STDOUT_FILENO, ":) ", 3);
 		}
+
 		getline_result = getline(&cmd, &cmd_size, stdin);
 
 		if (getline_result == -1)
@@ -53,13 +53,11 @@ int main()
 		}
 		if (strcmp(cmd, "env") == 0)
 		{
-			char **env = environ;
-			while (*env)
-			{
-				printf("%s\n", *env);
-				env++;
-			}
+			envCommand();
 		}
-		executeCommand(cmd, &commandStatus);
+		else
+		{
+			executeCommand(cmd, &commandStatus);
+		}
 	}
 }
