@@ -5,7 +5,6 @@
  *
  * Return: Always 0.
  */
-
 int main(void)
 {
 	char *cmd = NULL;
@@ -17,23 +16,16 @@ int main(void)
 	while (1)
 	{
 		if (is_interactive)
-		{
 			write(STDOUT_FILENO, ":) ", 3);
-		}
-
 		getline_result = getline(&cmd, &cmd_size, stdin);
-
 		if (getline_result == -1)
 		{
 			if (is_interactive)
-			{
 				write(STDOUT_FILENO, "\n", 1);
-			}
 			free(cmd);
 			exit(commandStatus);
 		}
 		cmd[getline_result - 1] = '\0';
-
 		for (i = 0; i < strlen(cmd); i++)
 		{
 			if (cmd[i] != ' ')
@@ -43,21 +35,15 @@ int main(void)
 			}
 		}
 		if (is_all_spaces)
-		{
 			continue;
-		}
 		if (strcmp(cmd, "exit") == 0)
 		{
 			free(cmd);
 			exit(commandStatus);
 		}
 		if (strcmp(cmd, "env") == 0)
-		{
 			envCommand();
-		}
 		else
-		{
 			executeCommand(cmd, &commandStatus);
-		}
 	}
 }

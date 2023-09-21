@@ -1,60 +1,51 @@
 #include "main.h"
+
 /**
- * executeCommand -function takes a command as input
- *
+ * executeCommand - Execute a given command.
  * @cmd: The command to execute.
+ * @commandStatus: Pointer to an integer.
  */
+
 void executeCommand(char *cmd, int *commandStatus)
 {
-    char *executable, *token, *argv[MAX_CMD_LEN];
-    int status, argc = 0;
-    pid_t pid;
+	char *executable, *argv[MAX_CMD_LEN];
+	int argc;
+	pid_t pid, status;
 
-    token = strtok(cmd, " ");
-    while (token != NULL)
-    {
-        argv[argc++] = token;
-        token = strtok(NULL, " ");
-    }
-    argv[argc] = NULL;
-    executable = findExecutable(argv[0]);
-
-    if (executable != NULL)
-    {
-        pid = fork();
-        if (pid == 0)
-       	{
-            if (execve(executable, argv, NULL) == -1)
-	    {
-                handleError(cmd);
-                *commandStatus = 1;
-                exit(1);
-            }
-        } 
-	else if (pid > 0)
-       	{
-            if (waitpid(pid, &status, 0) == -1)
-                handleError(cmd);
-            else 
-	    {
-                if (WIFEXITED(status))
-	       	{
-                    *commandStatus = WEXITSTATUS(status);
-                    if (*commandStatus != 0)
-                        handleError(cmd);
-                }
-            }
-        }
-       	else 
+	if (parseCommand(cmd, argv, &argc) <= 0)
 	{
-            handleError(cmd);
-        }
-        free(executable);
-    }
-    else
-    {
-        printf("Command not found: %s\n", argv[0]);
-        handleError(cmd);
-        *commandStatus = 1;
-    }
+		*commandStatus = 1;
+		return;
+	}
+	executable = findExecutable(argv[0]);
+	if (executable == NULL)
+	{
+		printf("Command not found: %s\n", argv[0]);
+		handleError(cmd);
+		*commandStatus = 1;
+		return;
+	}
+	pid = fork();
+	if (pid == -1)
+	{
+		handleError(cmd);
+		free(executable);
+		*commandStatus = 1;
+		return;
+	}
+	if (pid == 0)
+	{
+		if (execve(executable, argv, NULL) == -1)
+			handleError(cmd);
+		exit(1); }
+	else
+	{
+		if (waitpid(pid, &status, 0) == -1)
+			handleError(cmd);
+		else
+			if (WIFEXITED(status))
+				*commandStatus = WEXITSTATUS(status);
+		if (*commandStatus != 0)
+			handleError(cmd);
+		free(executable); }
 }
