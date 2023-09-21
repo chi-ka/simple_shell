@@ -11,8 +11,8 @@ extern char **environ;
 int main(void)
 {
 	char *cmd = NULL;
-	int is_interactive = isatty(STDIN_FILENO);
-	size_t cmd_size = 0;
+	int is_all_spaces = 1, is_interactive = isatty(STDIN_FILENO);
+	size_t i, cmd_size = 0;
 	ssize_t getline_result;
 
 	while (1)
@@ -34,8 +34,6 @@ int main(void)
 		}
 		cmd[getline_result - 1] = '\0';
 
-		int i;
-		int is_all_spaces = 1;
 		for (i = 0; i < strlen(cmd); i++)
 		{
 			if (cmd[i] != ' ')
